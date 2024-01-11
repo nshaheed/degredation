@@ -1,12 +1,43 @@
+
+// spork~ Rec.auto();
+
+// Set up up actual loop
+"../audio/loop.wav" => string loop_file;
+Sitting.load( "../audio/loop.wav" ) @=> LiSa @ loop;
+loop => Pan2 p_loop => blackhole; // dac;
+
+// Set up left/right degredation loops
+Sitting left(-1) => Pan2 p_left => dac;
+-1 => p_left.pan;
+
+/*
+Sitting right(1) => Pan2 p_right => dac;
+1 => p_right.pan;
+*/
+
+
+// vibe
+20::minute => now;
+
+/* 
+ chugraphs are only mono (which is fine)
+
+ the next things I want to do are to 
+ - test out putting loop in middle, and then left/right Sitting instances
+ - slightly change feedback values
+ - start adding more parts to it
+*/
 class Sitting extends Chugraph {
     load( "../audio/loop.wav" ) @=> LiSa @ degrade;
-    SndBuf loop("../audio/loop.wav");
+    load( "../audio/loop.wav" ) @=> LiSa @ loop;
+    // SndBuf loop("../audio/loop.wav");
+    // 1 => loop.loop;
     "../models/dataset1_c8864be852_streaming.ts" => string model;
 
     16 => int chans;
 
     // Put loop in center of mix
-    loop => Pan2 loop_pan => blackhole; // outlet;
+    // loop => Pan2 loop_pan => outlet;
 
     // loop audio encoder and decoder
     Mix2 m => Rave loop_encode => Rave loop_decode => blackhole;
@@ -14,18 +45,35 @@ class Sitting extends Chugraph {
     loop_decode.init(model, "decode");
 
     degrade => m.left;
-    loop => m.right;
-    -1 => m.pan;
+    loop => Delay d => m.right;
+
+/*
+    spork~ Rec.mono(degrade, me.dir() + "m-left");
+    spork~ Rec.mono(d, me.dir() + "m-right");
+    */
+    
+    // official  RAVE(tm) delay time
+    653::ms + 2048::samp => d.max => d.delay;
+    // m => outlet;
+    // loop => outlet;
+    // loop_decode => outlet;
+    // d => outlet;
+
+
+    //-1 => m.pan;
 
     loop_decode => outlet;
 
     spork~ updater();
 
+    fun @construct(float loop_mix) {
+        // set how much the original is mixed back in (-1,1)
+        loop_mix => m.pan;
+    }
 
-    // Feedback loop
-    // lisa => Mix2 loop_mix => Rave destruct_encode => 
-
-    // loop => Rave loopE;
+    fun @construct() {
+        -1 => m.pan;
+    }
 
     // update the lisa samples
     fun updater() {
@@ -36,7 +84,7 @@ class Sitting extends Chugraph {
     }
     
     // create a new LiSa pre-loaded with the specified file
-    fun LiSa load( string filename )
+    fun static LiSa load( string filename )
     {
         // sound buffer
         SndBuf buffy;
@@ -66,9 +114,3 @@ class Sitting extends Chugraph {
         return lisa;
     }
 }
-
-spork~ Rec.auto();
-
-Sitting s => dac;
-
-10::minute => now;
