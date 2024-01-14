@@ -198,7 +198,7 @@ fun processAddLeft() {
                 <= "arguments: " <= msg.numArgs() <= IO.newline();
 
             // check typetag for specific types
-            if( msg.typetag == "if" )
+            if( msg.typetag == "if" || msg.typetag == "ii" )
             {
                 // expected datatypes: int float
                 // (note: as indicated by "if")
@@ -245,7 +245,7 @@ fun processMultLeft() {
                 <= "arguments: " <= msg.numArgs() <= IO.newline();
 
             // check typetag for specific types
-            if( msg.typetag == "f" )
+            if( msg.typetag == "f" || msg.typetag == "i" )
             {
                 <<< "multiply!" >>>;
                 // expected datatypes: int float
@@ -290,7 +290,7 @@ fun processMuteLeft() {
                 <= "arguments: " <= msg.numArgs() <= IO.newline();
 
             // check typetag for specific types
-            if( msg.typetag == "i" )
+            if( msg.typetag == "i" || msg.typetag == "f" )
             {
                 <<< "mute!" >>>;
                 // expected datatypes: int float
@@ -339,7 +339,7 @@ fun processMicMixLeft() {
                 <= "arguments: " <= msg.numArgs() <= IO.newline();
 
             // check typetag for specific types
-            if( msg.typetag == "f" )
+            if( msg.typetag == "f" || msg.typetag == "i" )
             {
                 <<< "micing!" >>>;
                 // expected datatypes: int float
@@ -384,7 +384,7 @@ fun processAddRight() {
                 <= "arguments: " <= msg.numArgs() <= IO.newline();
 
             // check typetag for specific types
-            if( msg.typetag == "if" )
+            if( msg.typetag == "if" || msg.typetag == "ii"  )
             {
                 // expected datatypes: int float
                 // (note: as indicated by "if")
@@ -431,7 +431,7 @@ fun processMultRight() {
                 <= "arguments: " <= msg.numArgs() <= IO.newline();
 
             // check typetag for specific types
-            if( msg.typetag == "f" )
+            if( msg.typetag == "f" || msg.typetag == "i" )
             {
                 <<< "multiply!" >>>;
                 // expected datatypes: int float
@@ -476,7 +476,7 @@ fun processMuteRight() {
                 <= "arguments: " <= msg.numArgs() <= IO.newline();
 
             // check typetag for specific types
-            if( msg.typetag == "i" )
+            if( msg.typetag == "i" || msg.typetag == "f" )
             {
                 <<< "mute!" >>>;
                 // expected datatypes: int float
@@ -525,7 +525,7 @@ fun processMicMixRight() {
                 <= "arguments: " <= msg.numArgs() <= IO.newline();
 
             // check typetag for specific types
-            if( msg.typetag == "f" )
+            if( msg.typetag == "f" || msg.typetag == "i" )
             {
                 <<< "micing!" >>>;
                 // expected datatypes: int float
