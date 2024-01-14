@@ -12,10 +12,8 @@ It shows the pathway of how the audio (the loop, microphone input, and one of th
 Here is the OSC api, there will be two RAVE models - a left and a right one. To update the right one, just replace `/left/` with `/right/` in the osc address.
 ```
 # The model has 16 latent dimensions that can be manipulated
-/left/add/0, f
-/left/add/1, f
-...
-/left/add/15, f
+# The idx gives the dimension number (0-15) and the f gives the value to be added it it
+/left/add, idx f
 
 # multiply all latent dimensions by a scalar
 /left/mult, f
