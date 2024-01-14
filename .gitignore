@@ -2,5 +2,7 @@
 *.mp3
 *.opus
 *.asd
+*.mp4
+*.zip
 /ableton/
 /outputs/

@@ -3,14 +3,17 @@
 
 // Set up up actual loop
 "../audio/loop.wav" => string loop_file;
-Sitting.load( "../audio/loop.wav" ) @=> LiSa @ loop;
-loop => Pan2 p_loop => 
-    // dac;
-    blackhole;
+Sitting.load( "../audio/loop.wav" ) @=> LiSa @ loop; 
+
+Pan2 p_loop => Envelope e_loop =>
+    dac;
+    // blackhole;
 
 // Set up left/right degredation loops
-Sitting left => Pan2 p_left => dac;
--1 => p_left.pan;
+null @=> Sitting left;
+
+// Sitting left => Pan2 p_left => dac;
+// -1 => p_left.pan;
 
 
 Sitting right => Pan2 p_right => dac;
@@ -18,20 +21,23 @@ Sitting right => Pan2 p_right => dac;
 
 
 // OSC handlers
+/*
 spork~ processAddLeft();
 spork~ processMultLeft();
 spork~ processMuteLeft();
 spork~ processMicMixLeft();
+*/
 
 spork~ processAddRight();
 spork~ processMultRight();
 spork~ processMuteRight();
 spork~ processMicMixRight();
+spork~ processStart();
 
 
 
 // vibe
-20::minute => now;
+eon => now;
 
 /* 
  chugraphs are only mono (which is fine)
@@ -51,14 +57,16 @@ class Sitting extends Chugraph {
     16 => int chans;
 
     // loop audio encoder and decoder
-    degrade => Rave loop_encode => Rave loop_decode => blackhole;
+    Rave loop_encode => Rave loop_decode => blackhole;
     loop_encode.init(model, "encode");
     loop_decode.init(model, "decode");
 
     // output decoder - this makes the actual sound
     // loop_encode => 
     
-    Gain mic_mix[chans] => Gain mute[chans] => Gain mult[chans] => Rave output_decoder => outlet;
+    Gain mic_mix[chans] => Gain mute[chans] => Gain mult[chans] => Rave output_decoder => Envelope e => outlet;
+
+    5::second => e.duration;
 
     
 
@@ -82,6 +90,16 @@ class Sitting extends Chugraph {
     spork~ updater();
 
     // loop_decode => outlet;
+
+    // start the playing!
+    fun start() {
+        degrade => loop_encode;
+        e.keyOn();
+        // start loop
+        // turn on envelope
+        // party
+        // put envelope in class
+    }
 
     // update the lisa samples
     fun updater() {
@@ -522,6 +540,38 @@ fun processMicMixRight() {
 
                 right.mic(f);
             }
+        }
+    }
+}
+
+fun processStart() {
+    // create our OSC receiver
+    OscIn oin;
+    // create our OSC message
+    OscMsg msg;
+    // use port 6449 (or whatever)
+    6449 => oin.port;
+    // create an address in the receiver, expect an int and a float
+    oin.addAddress( "/start" );
+
+
+    // infinite event loop
+    while( true )
+    {
+        // wait for event to arrive
+        oin => now;
+
+        // grab the next message from the queue. 
+        while( oin.recv(msg) )
+        {
+            // print stuff
+            cherr <= "received OSC message: \"" <= msg.address <= "\" "
+                <= "typetag: \"" <= msg.typetag <= "\" "
+                <= "arguments: " <= msg.numArgs() <= IO.newline();
+
+            loop => p_loop;
+            e_loop.keyOn();
+            right.start();
         }
     }
 }

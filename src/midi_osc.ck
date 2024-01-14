@@ -29,6 +29,11 @@ fun handleMidi() {
     // aim the transmitter at destination
     xmit.dest( hostname, port );
 
+    /*
+    3::second => now;
+    xmit.start("/start");
+    xmit.send();
+    */
 
     0.01 => float increment;
     while(true) {
