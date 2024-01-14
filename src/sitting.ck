@@ -12,16 +12,22 @@ loop => Pan2 p_loop =>
 Sitting left => Pan2 p_left => dac;
 -1 => p_left.pan;
 
-/*
+
 Sitting right => Pan2 p_right => dac;
 1 => p_right.pan;
-*/
+
 
 // OSC handlers
-spork~ processAdd();
-spork~ processMult();
-spork~ processMute();
-spork~ processMicMix();
+spork~ processAddLeft();
+spork~ processMultLeft();
+spork~ processMuteLeft();
+spork~ processMicMixLeft();
+
+spork~ processAddRight();
+spork~ processMultRight();
+spork~ processMuteRight();
+spork~ processMicMixRight();
+
 
 
 // vibe
@@ -148,7 +154,7 @@ class Sitting extends Chugraph {
 }
 
 
-fun processAdd() {
+fun processAddLeft() {
     // create our OSC receiver
     OscIn oin;
     // create our OSC message
@@ -195,7 +201,7 @@ fun processAdd() {
     }
 }
 
-fun processMult() {
+fun processMultLeft() {
     // create our OSC receiver
     OscIn oin;
     // create our OSC message
@@ -240,7 +246,7 @@ fun processMult() {
     }
 }
 
-fun processMute() {
+fun processMuteLeft() {
     // create our OSC receiver
     OscIn oin;
     // create our OSC message
@@ -289,7 +295,7 @@ fun processMute() {
     }
 }
 
-fun processMicMix() {
+fun processMicMixLeft() {
     // create our OSC receiver
     OscIn oin;
     // create our OSC message
@@ -329,6 +335,192 @@ fun processMicMix() {
                 cherr <= f <= IO.newline();
 
                 left.mic(f);
+            }
+        }
+    }
+}
+
+fun processAddRight() {
+    // create our OSC receiver
+    OscIn oin;
+    // create our OSC message
+    OscMsg msg;
+    // use port 6449 (or whatever)
+    6449 => oin.port;
+    // create an address in the receiver, expect an int and a float
+    oin.addAddress( "/right/add" );
+
+
+    // infinite event loop
+    while( true )
+    {
+        // wait for event to arrive
+        oin => now;
+
+        // grab the next message from the queue. 
+        while( oin.recv(msg) )
+        {
+            // print stuff
+            cherr <= "received OSC message: \"" <= msg.address <= "\" "
+                <= "typetag: \"" <= msg.typetag <= "\" "
+                <= "arguments: " <= msg.numArgs() <= IO.newline();
+
+            // check typetag for specific types
+            if( msg.typetag == "if" )
+            {
+                // expected datatypes: int float
+                // (note: as indicated by "if")
+                int i;
+                float f;
+
+                // fetch the first data element as int
+                msg.getInt(0) => i;
+                // fetch the second data element as float
+                msg.getFloat(1) => f; // => s.gain;
+
+                // print
+                cherr <= i <= ", " <= f <= IO.newline();
+
+                right.addChan(i, f);
+            }
+        }
+    }
+}
+
+fun processMultRight() {
+    // create our OSC receiver
+    OscIn oin;
+    // create our OSC message
+    OscMsg msg;
+    // use port 6449 (or whatever)
+    6449 => oin.port;
+    // create an address in the receiver, expect an int and a float
+    oin.addAddress( "/right/mult" );
+
+
+    // infinite event loop
+    while( true )
+    {
+        // wait for event to arrive
+        oin => now;
+
+        // grab the next message from the queue. 
+        while( oin.recv(msg) )
+        {
+            // print stuff
+            cherr <= "received OSC message: \"" <= msg.address <= "\" "
+                <= "typetag: \"" <= msg.typetag <= "\" "
+                <= "arguments: " <= msg.numArgs() <= IO.newline();
+
+            // check typetag for specific types
+            if( msg.typetag == "f" )
+            {
+                <<< "multiply!" >>>;
+                // expected datatypes: int float
+                // (note: as indicated by "if")
+                float f;
+
+                // fetch the second data element as float
+                msg.getFloat(0) => f; // => s.gain;
+
+                // print
+                cherr <= f <= IO.newline();
+
+                right.multChan(f);
+            }
+        }
+    }
+}
+
+fun processMuteRight() {
+    // create our OSC receiver
+    OscIn oin;
+    // create our OSC message
+    OscMsg msg;
+    // use port 6449 (or whatever)
+    6449 => oin.port;
+    // create an address in the receiver, expect an int and a float
+    oin.addAddress( "/right/mute" );
+
+
+    // infinite event loop
+    while( true )
+    {
+        // wait for event to arrive
+        oin => now;
+
+        // grab the next message from the queue. 
+        while( oin.recv(msg) )
+        {
+            // print stuff
+            cherr <= "received OSC message: \"" <= msg.address <= "\" "
+                <= "typetag: \"" <= msg.typetag <= "\" "
+                <= "arguments: " <= msg.numArgs() <= IO.newline();
+
+            // check typetag for specific types
+            if( msg.typetag == "i" )
+            {
+                <<< "mute!" >>>;
+                // expected datatypes: int float
+                // (note: as indicated by "if")
+                int i;
+
+                // fetch the second data element as float
+                msg.getInt(0) => i; // => s.gain;
+
+                // print
+                cherr <= i <= IO.newline();
+
+                if (i) {
+                    right.muteChan();
+                } else {
+                    right.unmuteChan();
+                }
+            }
+        }
+    }
+}
+
+fun processMicMixRight() {
+    // create our OSC receiver
+    OscIn oin;
+    // create our OSC message
+    OscMsg msg;
+    // use port 6449 (or whatever)
+    6449 => oin.port;
+    // create an address in the receiver, expect an int and a float
+    oin.addAddress( "/right/mic/mix" );
+
+
+    // infinite event loop
+    while( true )
+    {
+        // wait for event to arrive
+        oin => now;
+
+        // grab the next message from the queue. 
+        while( oin.recv(msg) )
+        {
+            // print stuff
+            cherr <= "received OSC message: \"" <= msg.address <= "\" "
+                <= "typetag: \"" <= msg.typetag <= "\" "
+                <= "arguments: " <= msg.numArgs() <= IO.newline();
+
+            // check typetag for specific types
+            if( msg.typetag == "f" )
+            {
+                <<< "micing!" >>>;
+                // expected datatypes: int float
+                // (note: as indicated by "if")
+                float f;
+
+                // fetch the second data element as float
+                msg.getFloat(0) => f; // => s.gain;
+
+                // print
+                cherr <= f <= IO.newline();
+
+                right.mic(f);
             }
         }
     }
